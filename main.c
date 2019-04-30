@@ -23,7 +23,6 @@ typedef struct CIDADE {
     char n_cidade[50];
     lPDI PDIS;
     lCIDADE cidades;
-
 }CIDADE;
 
 typedef struct USER * lUSER;
@@ -51,6 +50,46 @@ int assign(CIDADE *variable, const char *str,char *membro_struct) { //como e que
 }
 */
 
+lPDI cria_lista_PDIS(char* n_PDI, char* descricao, char* horario) {
+    lPDI aux;
+    aux = (lPDI) malloc (sizeof (lPDI));
+    if (aux != NULL) {
+        strcpy(aux->n_pdi, n_PDI);
+        strcpy(aux->descricao, descricao);
+        strcpy(aux->horario, horario);
+        //aux->PDIS = cria_lista_PDIS;  -> incorreto mas e melhor deixar por agr caso seja preciso
+        aux->PDIS = NULL;
+    }
+    return aux;
+}
+
+lCIDADE cria_lista_cidade(char* nome_cidade) {
+    lCIDADE aux;
+    aux = (lCIDADE) malloc (sizeof (lCIDADE));
+    if (aux != NULL) {
+        strcpy(aux->n_cidade, nome_cidade);
+        aux->PDIS = cria_lista_PDIS;
+        aux->cidades = NULL;
+    }
+    return aux;
+}
+
+int lista_vazia_CIDADES(lCIDADE lista) {
+    return(lista->cidades == NULL ? 2 : 0);
+}
+
+void procura_lista_CIDADES(lCIDADE lista, char chave, lCIDADE *ant, lCIDADE *actual) {
+    *ant = lista;
+    *actual = lista->cidades;
+    while ((*actual) != NULL && strcmp((*actual)->n_cidade, chave)){
+        *ant = *actual;
+        *actual = (*actual)->cidades;
+    }
+    if ((*actual) != NULL && strcmp((*actual)->n_cidade, chave))
+        *actual = NULL;
+}
+
+
 //https://stackoverflow.com/questions/33326621/c-program-sort-a-text-file-with-records-alphabetical-order
 
 
@@ -62,7 +101,7 @@ int organizar_pdi(void *pa, void *pb) {
     return strcmp(((PDI*)pa)->n_pdi, ((PDI*)pb)->n_pdi);
 }
 
-void criar_ficheiro() {
+int ler_ficheiro() {
     FILE *teste;
     FILE *teste2;
     char linha[20];
@@ -115,9 +154,12 @@ void criar_ficheiro() {
 */
     printf("\n%s", Paris.n_cidade); // da print do nome da cidade (usa FUck agr pois e a mais recente, e necessario arranjar metodo de criar struct para todos os paises)(pra que raio queria eu isto?)(UPDATE!!! acho que era so pra manutenao e verificar se a struct recebia como argumento a string, e possivel que se tenha de repetir manualmente para cada argumento)mais uma vitima de ainda nao saber criar novas structs com o nome do ficheiro.
     //printf("%s %s", Paris -> n_cidade, Paris -> pdi1);
+
+
+    return 0;
 }
 
-void criar_user() {
+int criar_user() {
     //iniciar variaveis para todos os dados necessarios
     //char dados_basic[100]; //todos os dados juntos
     char nome[100];
@@ -177,10 +219,12 @@ void criar_user() {
     fprintf(users, "£%s\n§%s\n@%s\n!%s\n", nome, nascimento, telefone, morada); //escrever os dados do user, £ para o nome, § para a idade, @ para o telefone
     fclose(users); //fechar ficheiro
 
+
+    return 0;
 }
 
 int main() {
-    criar_ficheiro();
+    ler_ficheiro();
     criar_user();     //-> testado, funciona ao escrever o user no file
     return 0;
 }
