@@ -50,6 +50,9 @@ int assign(CIDADE *variable, const char *str,char *membro_struct) { //como e que
 }
 */
 
+
+
+/*
 lPDI cria_lista_PDIS(char* n_PDI, char* descricao, char* horario) {
     lPDI aux;
     aux = (lPDI) malloc (sizeof (lPDI));
@@ -63,11 +66,11 @@ lPDI cria_lista_PDIS(char* n_PDI, char* descricao, char* horario) {
     return aux;
 }
 
-lCIDADE cria_lista_cidade(char* nome_cidade) {
+lCIDADE cria_lista_cidade() {
     lCIDADE aux;
     aux = (lCIDADE) malloc (sizeof (lCIDADE));
     if (aux != NULL) {
-        strcpy(aux->n_cidade, nome_cidade);
+        strcpy(aux->n_cidade, "");
         aux->PDIS = cria_lista_PDIS;
         aux->cidades = NULL;
     }
@@ -89,6 +92,37 @@ void procura_lista_CIDADES(lCIDADE lista, char chave, lCIDADE *ant, lCIDADE *act
         *actual = NULL;
 }
 
+lCIDADE insere_lista_CIDADES(lCIDADE lista, char it[]) {
+    lCIDADE no;
+    lCIDADE ant, inutil;
+    no = (lCIDADE) malloc (sizeof(lCIDADE));    //reserva espaço para o nó
+    if (no != NULL) {
+        strcpy(no->n_cidade, it);
+        procura_lista_CIDADES (lista, it, &ant, &inutil);
+        no->PDIS = cria_lista_PDIS;
+        no->cidades = ant->cidades;
+        ant->cidades = no;
+    }
+    return no;
+}
+
+void imprime_lista_PDIS(lPDI lista) {
+    lPDI l = lista->PDIS; //salta o header
+    while (l) {
+        printf("%s ", l->n_pdi);
+        imprime_lista_PDIS(l->PDIS);
+        l = l->PDIS;
+    }
+}
+
+void imprime_lista_cidades(lCIDADE lista) {
+    lCIDADE l = lista->cidades; //salta o header
+    while (l) {
+        printf("%s ", l->n_cidade);
+        imprime_lista_PDIS(l->PDIS);
+        l = l->cidades;
+    }
+}
 
 //https://stackoverflow.com/questions/33326621/c-program-sort-a-text-file-with-records-alphabetical-order
 
@@ -100,7 +134,7 @@ int organizar_cidade(void *pa, void *pb) {
 int organizar_pdi(void *pa, void *pb) {
     return strcmp(((PDI*)pa)->n_pdi, ((PDI*)pb)->n_pdi);
 }
-
+*/
 int ler_ficheiro() {
     FILE *teste;
     FILE *teste2;
@@ -118,7 +152,7 @@ int ler_ficheiro() {
      */
 
     //le linha e retira marcador(neste caso asterisco(*))
-    teste2 = fopen("project.txt", "r");
+    teste2 = fopen("D:\\Documentos\\Uni\\1a2s\\PPP\\projeto_ppp\\cmake-build-debug\\project.txt", "r");
     while(fgets(linha, 20, teste2)!= NULL) {
         //printf("%s", linha);
 
@@ -161,21 +195,11 @@ int ler_ficheiro() {
 
 int criar_user() {
     //iniciar variaveis para todos os dados necessarios
-    //char dados_basic[100]; //todos os dados juntos
     char nome[100];
-    //char apelido[100];
-    //char nome_completo[100]; //nome depois de juntar o primeiro nome e apelido
     char nascimento[30];
     char telefone[20];
     char morada[50];
 
-    //printf("Informaçao necessaria para criar um perfil de utilizador:\nNome \tApelido \tDada de nascimento(dia/mes/ano) \t Nr. Telefone \t"); //apenas para informar do formato a inserir pelo utilizador
-
-    //fgets(dados_basic,100, stdin); //conseguir os dados inseridos, stdin significa input do teclado
-
-    //printf("\ntodos os dados:%s", dados_basic); //para teste, mostra todos os dados inseridos
-
-    //sscanf(dados_basic, "%s %s %s %s", nome, apelido, idade, telefone); //separa os dados nas suas devidas variaveis
 
     printf("Nome: \n");
     gets(nome);
@@ -194,14 +218,7 @@ int criar_user() {
 
     printf("\ntudo novamente: %s %s %s %s \n", nome, nascimento, telefone, morada); //para teste, verificar que tudo ficou dividido em diferentes variaveis
 
-    //strcpy(nome_completo, nome); //adicionar o primeiro nome a variavel "nome_completo"
-    //strcat(nome_completo, " "); //adicionar espaço entre o nome e apelido
-    //strcat(nome_completo, apelido); // adicionar apelido a variavel "nome_completo"
-    //printf("\nsim, tudo novamente: %s\t%s\t%s\t", nome_completo, nascimento, telefone); //teste para verificar variavel "nome_completo" e verificar tudo novamente
-
-
     //atribuiçao de dados a struct do user. sera que invalida a necessidade da funcao assign?
-    //como e que raio e que posso fazer com que o programa crie uma struct com o nome do user puxada do ficheiro, e a auto preencha?
     //USER user_atual = {nome, nascimento, telefone, morada}; //probs vai ser usada mais para ler do ficheiro e preencher a struct do que a criar o user, mas fica aqui por motivos de testing.
     USER user_atual;
     strcpy(user_atual.nome, nome);
@@ -225,17 +242,6 @@ int criar_user() {
 
 int main() {
     ler_ficheiro();
-    criar_user();     //-> testado, funciona ao escrever o user no file
+    //criar_user();     //-> testado, funciona ao escrever o user no file
     return 0;
 }
-
-/*          //funcao que copiei para fazer a PUTA DA STRUCT, so falta fazer sem especificar o nome da struct/ fazer de modo automatico
-int assign(name *variable, const char *str)
-{
-    if(variable)
-    {
-        variable->array=(char*)calloc(strlen(str),sizeof(char));
-        strncpy(variable->array,str,strlen(str));
-    }
-    return 0;
-}  */
