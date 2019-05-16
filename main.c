@@ -73,7 +73,7 @@ void procura_lista_CIDADES(lCIDADE lista, char chave[], lCIDADE *ant, lCIDADE *a
         *actual = NULL;
 }
 
-void insere_lista_CIDADES(lCIDADE lista, char it[]) {
+lCIDADE insere_lista_CIDADES(lCIDADE lista, char it[]) {
     lCIDADE no;
     lCIDADE ant, inutil;
     no = (lCIDADE) malloc (sizeof(lCIDADE));    //reserva espaço para o nó
@@ -84,6 +84,7 @@ void insere_lista_CIDADES(lCIDADE lista, char it[]) {
         no->cidades = ant->cidades;
         ant->cidades = no;
     }
+    return no;
 }
 
 void procura_lista_PDIS(lPDI lista, char chave[], lPDI *ant, lPDI *actual) {
@@ -123,14 +124,15 @@ void insere_lista_PDIS_desc(lPDI lista, char it[]) {
     }
 }
 
-void insere_lista_PDIS_horario(lPDI lista, char it[1000]) {
+void insere_lista_PDIS_horario(lPDI lista,char nome_pdi[1000],char descricao[2000], char horario[1000]) {
     lPDI no;
     lPDI ant, inutil;
     no = (lPDI) malloc (sizeof(lPDI));    //reserva espaço para o nó
     if (no != NULL) {
-        strcpy(no->horario, it);
-        procura_lista_PDIS (lista, it, &ant, &inutil);
-
+        strcpy(no->n_pdi, nome_pdi);
+        strcpy(no->descricao, descricao);
+        strcpy(no->horario, horario);
+        procura_lista_PDIS (lista, nome_pdi, &ant, &inutil);
         no->PDIS = ant->PDIS;
         ant->PDIS = no;
         no->PDIS = cria_lista_PDIS();
@@ -168,53 +170,45 @@ int organizar_pdi(void *pa, void *pb) {
 
 
 
-
 int ler_ficheiro() {
     FILE *teste;
-    char linha[2000];
-    char copy_linha[1000];
+    char linha[20000];
     char nome_cidade[50];
     char nome_pdi[50];
     char descricao[1000];
     char horario[50];
 
-    lPDI l_pdis;     //DANGER: nao sei se funciona, ver se e assim depois(pelo menos
-    lCIDADE l_cidades;
+    lCIDADE l_cidades, aux;
     l_cidades = cria_lista_cidade();
     int count = 1; //counter do numero do pdi, reseta sempre que se vai para uma cidade diferente
 
     teste = fopen("D:\\Documentos\\Uni\\1a2s\\PPP\\projeto_ppp\\cmake-build-debug\\project.txt", "r");
     while(fgets(linha, 2000, teste)!= NULL) {
 
+
         if (linha[0]=='*') {
             count = 1; //reseta o counter de pdi
-            strcpy(copy_linha, &linha[1]);
-            strcpy(nome_cidade, copy_linha);    //adicionar o nome da cidade ao struct
-            printf("%s", copy_linha);
-            insere_lista_CIDADES(l_cidades, copy_linha);
-            l_pdis = cria_lista_PDIS();    //criar lista de PDIS sempre que se mudar de cidade
+            strcpy(nome_cidade, linha+1);    //adicionar o nome da cidade ao struct
+            printf("%s", linha+1);
+            aux = insere_lista_CIDADES(l_cidades, linha+1);
+           /* l_pdis = cria_lista_PDIS();    //criar lista de PDIS sempre que se mudar de cidade*/
         }
 
         else if (linha[0]=='&') {
-            strcpy(copy_linha, &linha[1]);
-            //strcpy(nome_pdi, copy_linha);  como nao vou adicionar tudo de uma vez nao deve ser necessario
-            printf("PDI nr. %d -> %s", count, copy_linha); //legit esta merda nao tava a dar print de nada e taa a lixar o programa e do nada funcionou, nao sei que magia negra e mas nao mexas muito nisto.
+            printf("PDI nr. %d -> %s", count, linha+1); //legit esta merda nao tava a dar print de nada e taa a lixar o programa e do nada funcionou, nao sei que magia negra e mas nao mexas muito nisto.
             count++; //incrementa o counter do pdi
-            insere_lista_PDIS_nome(l_pdis, copy_linha);     //falha depois/antes disto
+            strcpy(nome_pdi, linha+1);
         }
 
         else if (linha[0]=='#') {
-            strcpy(copy_linha, &linha[1]);
-            //strcpy(descricao, copy_linha);  como nao vou adicionar tudo de uma vez nao deve ser necessario
-            printf("Descricao:%s", copy_linha);
-            insere_lista_PDIS_desc(l_pdis, copy_linha);
+            printf("Descricao:%s", linha+1);
+            strcpy(descricao, linha+1);
         }
 
         else if (linha[0]=='$') {
-            strcpy(copy_linha, &linha[1]);
-            //strcpy(horario, copy_linha);  como nao vou adicionar tudo de uma vez nao deve ser necessario
-            printf("Horario: %s", copy_linha);
-            insere_lista_PDIS_horario(l_pdis, copy_linha);
+            printf("Horario: %s", linha+1);
+            strcpy(horario, linha+1);
+            insere_lista_PDIS_horario(aux->PDIS, nome_pdi, descricao, horario);
         }
 
         else {
@@ -341,3 +335,4 @@ int assign(CIDADE *variable, const char *str,char *membro_struct) { //como e que
     return 0;
 }
 */
+
