@@ -121,18 +121,11 @@ lCIDADE insere_lista_CIDADES(lCIDADE lista, char it[]) {
     no = (lCIDADE) malloc (sizeof(CIDADE));    //reserva espaço para o nó
 
     if (no != NULL) {
-            //printf("struct CITYtest 1: nada\n");
         strcpy(no->n_cidade, it);
-            //printf("struct CITYtest2:   %s",no->n_cidade);
         procura_lista_CIDADES (lista, it, &ant, &inutil);
-            //printf("struct CITYtest3:   %s",no->n_cidade);
         no->PDIS = cria_lista_PDIS();
-            //printf("struct CITYtest4:   %s",no->n_cidade);
         no->cidades = ant->cidades;
-            //printf("struct CITYtest5:   %s",no->n_cidade);
         ant->cidades = no;
-            //printf("struct CITYtest6:   %s",no->n_cidade);
-       // printf("ins %s %p %p %p %p\n", it ,lista, ant, (ant)->cidades,inutil);
     }
     return no;
 }
@@ -192,28 +185,100 @@ void imprime_lista_cidades(lCIDADE lista) {
 
 //https://stackoverflow.com/questions/33326621/c-program-sort-a-text-file-with-records-alphabetical-order
 
-
+/*
 int organizar_cidade(lCIDADE lista) {
+    lCIDADE *ant;
+    lCIDADE *actual;
     lCIDADE temp;
+    *ant = lista;
+    *actual = lista->cidades;
     while(lista->cidades != NULL) {
-        if (strcmp((lista->n_cidade),lista->cidades->n_cidade) > 0) {
-            temp = lista->cidades->cidades;
+        *ant = *actual;
+        if (strcmp(((*ant)->n_cidade),((*actual)->n_cidade)) > 0) {
+            temp = *actual;
+            (*actual)->cidades = *ant;
+            (*ant)->cidades = temp->cidades;
+
+            *temp = lista->cidades->cidades;
             lista->cidades->cidades = lista;
             lista->cidades = temp;
+
         }
     }
     //return strcmp(((CIDADE*)pa)->n_cidade, ((CIDADE*)pb)->n_cidade);
 }
+*/
+/*
+static int compare_people(lCIDADE *a, lCIDADE *b) {
+    return strcmp((*a)->n_cidade, (*b)->n_cidade);
+}
+*/
 
-int organizar_pdi(lPDI lista) {
-    lPDI temp;
-    while (lista->PDIS != NULL) {
-        if (strcmp((lista->n_pdi), lista->PDIS->n_pdi) > 0) {
-            temp = lista->PDIS->PDIS;
-            lista->PDIS->PDIS = lista;
-            lista->PDIS = temp;
-        }
+//idk nao vale a pena
+/*
+static CIDADE *insert_sorted(struct person *headptr, char *nome, int age) {
+    // Allocate heap space for a record
+    CIDADE *ptr = malloc(sizeof(CIDADE));
+    if (ptr == NULL) {
+        abort();
     }
+
+    // Assign to structure fields
+    strcpy((*ptr).n_cidade,nome);
+    (*ptr).cidades = NULL;
+
+    CIDADE **pp = &headptr;
+    while (*pp != NULL && compare_people(ptr, *pp) >= 0) {
+        pp = &(*pp)->cidades;
+    }
+    ptr->cidades = *pp;
+    *pp = ptr;
+
+    return headptr;
+}
+*/
+
+
+//https://www.geeksforgeeks.org/c-program-bubble-sort-linked-list/
+void swap(CIDADE *a, CIDADE *b)
+{
+    char *temp = a->n_cidade;
+    lCIDADE temp2 = a->cidades;
+
+    strcpy(a->n_cidade, b->n_cidade);
+    //a->cidades = b->cidades;
+
+    strcpy(b->n_cidade, temp);
+    //b->cidades = temp2->cidades;
+}
+
+void bubbleSort(CIDADE *start)
+{
+    int swapped, i;
+    CIDADE *ptr1;
+    CIDADE *lptr = NULL;
+
+    /* Checking for empty list */
+    if (start == NULL)
+        return;
+
+    do
+    {
+        swapped = 0;
+        ptr1 = start;
+
+        while (ptr1->cidades != lptr)
+        {
+            if (strcmp(ptr1->n_cidade, ptr1->cidades->n_cidade) > 0)
+            {
+                swap(ptr1, ptr1->cidades);
+                swapped = 1;
+            }
+            ptr1 = ptr1->cidades;
+        }
+        lptr = ptr1;
+    }
+    while (swapped);
 }
 
 
@@ -245,8 +310,6 @@ void ler_ficheiro(lCIDADE lista) {
             strcpy(nome_pdit, linha+1);
         }
 
-//a partir daqui o imprimir cidades para de funcionar
-
         else if (linha[0]=='#') {
             //printf("Descricao:%s", linha+1);
             strcpy(descricaot, linha+1);
@@ -265,7 +328,7 @@ void ler_ficheiro(lCIDADE lista) {
     }
 
     fclose(teste);
-    imprime_lista_cidades(lista);
+    //imprime_lista_cidades(lista);
 
 }
 
@@ -413,7 +476,12 @@ int main() {
     //menu(l_cidades);           //-> devera ficar ligado no final, desligado para testes com listas ligadas e ficheiros
     ler_ficheiro(l_cidades);
     //criar_user();     //-> testado, funciona ao escrever o user no file
-    //imprime_lista_cidades(l_cidades);
+    //organizar_cidade(l_cidades);
+    imprime_lista_cidades(l_cidades);
+    printf("\n\n\n");
+    bubbleSort(l_cidades);
+    printf("\n\n\n");
+    imprime_lista_cidades(l_cidades);
 
     return 0;
 }
