@@ -14,7 +14,7 @@ typedef struct PDI {
     lPDI PDIS;
 }PDI;
 
-//substituir os pdis por lista ligada
+
 typedef struct CIDADE * lCIDADE;
 typedef struct CIDADE {
     char n_cidade[50];
@@ -32,16 +32,57 @@ typedef struct USER {
     lUSER users;
 }USER;
 
+lUSER cria_lista_USERS() {
+    lUSER aux;
+    aux = (lUSER) malloc (sizeof (USER));
+    if (aux != NULL) {
+        strcpy(aux->nome, "");
+        strcpy(aux->nascimento, "");
+        strcpy(aux->nr_telefone, "");
+        aux->users = NULL;
+    }
+    return aux;
+}
 
+void procura_lista_USERS(lUSER lista, char chave[], lUSER *ant, lUSER *actual) {
+    *ant = lista;
+    *actual = lista->users;
+    while ((*actual) != NULL && strcmp((*actual)->nome, chave)<0){
+        *ant = *actual;
+        *actual = (*actual)->users;
+    }
+    if ((*actual) != NULL && strcmp((*actual)->nome, chave)!=0)
+        *actual = NULL;     //se o elemento nao for encontrado
+}
+
+
+void insere_lista_USERS(lUSER lista,char nome[100],char nascimento[30], char nr_telefone[20], char morada[50], char pdi_hot[50]) {
+    lUSER no;
+    lUSER ant, inutil;
+    no = (lUSER) malloc (sizeof(USER));    //reserva espaço para o nó
+
+    if (no != NULL) {
+
+        strcpy(no->nome, nome);
+        strcpy(no->nascimento, nascimento);
+        strcpy(no->nr_telefone, nr_telefone);
+
+        procura_lista_USERS(lista, nome, &ant, &inutil);
+
+        no->users = ant->users;
+
+        ant->users = no;
+    }
+
+}
 
 lPDI cria_lista_PDIS() {
     lPDI aux;
-    aux = (lPDI) malloc (sizeof (lPDI));
+    aux = (lPDI) malloc (sizeof (PDI));
     if (aux != NULL) {
         strcpy(aux->n_pdi, "");
         strcpy(aux->descricao, "");
         strcpy(aux->horario, "");
-        //aux->PDIS = cria_lista_PDIS;  -> incorreto mas e melhor deixar por agr caso seja preciso
         aux->PDIS = NULL;
     }
     return aux;
@@ -49,7 +90,7 @@ lPDI cria_lista_PDIS() {
 
 lCIDADE cria_lista_cidade() {
     lCIDADE aux;
-    aux = (lCIDADE) malloc (sizeof (lCIDADE));
+    aux = (lCIDADE) malloc (sizeof (CIDADE));
     if (aux != NULL) {
         strcpy(aux->n_cidade, "");
         aux->PDIS = cria_lista_PDIS();
@@ -65,24 +106,33 @@ int lista_vazia_CIDADES(lCIDADE lista) {
 void procura_lista_CIDADES(lCIDADE lista, char chave[], lCIDADE *ant, lCIDADE *actual) {
     *ant = lista;
     *actual = lista->cidades;
-    while ((*actual) != NULL && (*actual)->n_cidade < chave){
+    while ((*actual) != NULL && strcmp((*actual)->n_cidade,  chave)<0){
         *ant = *actual;
         *actual = (*actual)->cidades;
     }
-    if ((*actual) != NULL && ((*actual)->n_cidade != chave))
+    if ((*actual) != NULL && strcmp((*actual)->n_cidade, chave)!=0)
         *actual = NULL;
+   //  printf("procura %s %p %p %p %p\n", chave ,lista, *ant, (*ant)->cidades,*actual);
 }
 
 lCIDADE insere_lista_CIDADES(lCIDADE lista, char it[]) {
     lCIDADE no;
     lCIDADE ant, inutil;
-    no = (lCIDADE) malloc (sizeof(lCIDADE));    //reserva espaço para o nó
+    no = (lCIDADE) malloc (sizeof(CIDADE));    //reserva espaço para o nó
+
     if (no != NULL) {
+            //printf("struct CITYtest 1: nada\n");
         strcpy(no->n_cidade, it);
+            //printf("struct CITYtest2:   %s",no->n_cidade);
         procura_lista_CIDADES (lista, it, &ant, &inutil);
+            //printf("struct CITYtest3:   %s",no->n_cidade);
         no->PDIS = cria_lista_PDIS();
+            //printf("struct CITYtest4:   %s",no->n_cidade);
         no->cidades = ant->cidades;
+            //printf("struct CITYtest5:   %s",no->n_cidade);
         ant->cidades = no;
+            //printf("struct CITYtest6:   %s",no->n_cidade);
+       // printf("ins %s %p %p %p %p\n", it ,lista, ant, (ant)->cidades,inutil);
     }
     return no;
 }
@@ -90,60 +140,43 @@ lCIDADE insere_lista_CIDADES(lCIDADE lista, char it[]) {
 void procura_lista_PDIS(lPDI lista, char chave[], lPDI *ant, lPDI *actual) {
     *ant = lista;
     *actual = lista->PDIS;
-    while ((*actual) != NULL && ((*actual)->n_pdi < chave)){
+    while ((*actual) != NULL && strcmp((*actual)->n_pdi, chave)<0){
         *ant = *actual;
         *actual = (*actual)->PDIS;
     }
-    if ((*actual) != NULL && ((*actual)->n_pdi != chave))
-        *actual = NULL;
+    if ((*actual) != NULL && strcmp((*actual)->n_pdi, chave)!=0)
+        *actual = NULL;     //se o elemento nao for encontrado
 }
 
-void insere_lista_PDIS_nome(lPDI lista, char it[]) {
-    lPDI no;
-    lPDI ant, inutil;
-    no = (lPDI) malloc (sizeof(lPDI));    //reserva espaço para o nó
-    if (no != NULL) {
-        strcpy(no->n_pdi, it);
-        procura_lista_PDIS (lista, it, &ant, &inutil);
-        //no->PDIS = cria_lista_PDIS();           //em comentario pois so deve criar nova lista depois do horario
-        no->PDIS = ant->PDIS;
-        ant->PDIS = no;
-    }
-}
 
-void insere_lista_PDIS_desc(lPDI lista, char it[]) {
-    lPDI no;
-    lPDI ant, inutil;
-    no = (lPDI) malloc (sizeof(lPDI));    //reserva espaço para o nó
-    if (no != NULL) {
-        strcpy(no->descricao, it);
-        procura_lista_PDIS (lista, it, &ant, &inutil);
-        //no->PDIS = cria_lista_PDIS;           em comentario pois so deve criar nova lista depois do horario
-        no->PDIS = ant->PDIS;
-        ant->PDIS = no;
-    }
-}
 
-void insere_lista_PDIS_horario(lPDI lista,char nome_pdi[1000],char descricao[2000], char horario[1000]) {
+void insere_lista_PDIS(lPDI lista,char nome_pdi[100],char descricao[2000], char horario[100]) {
     lPDI no;
     lPDI ant, inutil;
-    no = (lPDI) malloc (sizeof(lPDI));    //reserva espaço para o nó
+    no = (lPDI) malloc (sizeof(PDI));    //reserva espaço para o nó
+
     if (no != NULL) {
-        strcpy(no->n_pdi, nome_pdi);
+            //printf("struct PDItest1:   nada\n");
+        strcpy(no->n_pdi, nome_pdi);          //e nestes strcpy que bloqueiam algum progresso, sem eles chega ate ao museu do louvre
         strcpy(no->descricao, descricao);
         strcpy(no->horario, horario);
-        procura_lista_PDIS (lista, nome_pdi, &ant, &inutil);
+            //printf("struct PDItest2:   %s\n",no->n_pdi);
+        procura_lista_PDIS(lista, nome_pdi, &ant, &inutil);
+            //printf("struct PDItest3:   %s\n",no->n_pdi);
         no->PDIS = ant->PDIS;
+            //printf("struct PDItest4:   %s\n",no->n_pdi);
         ant->PDIS = no;
-        no->PDIS = cria_lista_PDIS();
     }
+
 }
 
 void imprime_lista_PDIS(lPDI lista) {
     lPDI l = lista->PDIS; //salta o header
     while (l) {
         printf("%s ", l->n_pdi);
-        imprime_lista_PDIS(l->PDIS);
+        printf("%s ", l->descricao);
+        printf("%s ", l->horario);
+        //imprime_lista_PDIS(l->PDIS);
         l = l->PDIS;
     }
 }
@@ -160,63 +193,80 @@ void imprime_lista_cidades(lCIDADE lista) {
 //https://stackoverflow.com/questions/33326621/c-program-sort-a-text-file-with-records-alphabetical-order
 
 
-int organizar_cidade(void *pa, void *pb) {
-    return strcmp(((CIDADE*)pa)->n_cidade, ((CIDADE*)pb)->n_cidade);
+int organizar_cidade(lCIDADE lista) {
+    lCIDADE temp;
+    while(lista->cidades != NULL) {
+        if (strcmp((lista->n_cidade),lista->cidades->n_cidade) > 0) {
+            temp = lista->cidades->cidades;
+            lista->cidades->cidades = lista;
+            lista->cidades = temp;
+        }
+    }
+    //return strcmp(((CIDADE*)pa)->n_cidade, ((CIDADE*)pb)->n_cidade);
 }
 
-int organizar_pdi(void *pa, void *pb) {
-    return strcmp(((PDI*)pa)->n_pdi, ((PDI*)pb)->n_pdi);
+int organizar_pdi(lPDI lista) {
+    lPDI temp;
+    while (lista->PDIS != NULL) {
+        if (strcmp((lista->n_pdi), lista->PDIS->n_pdi) > 0) {
+            temp = lista->PDIS->PDIS;
+            lista->PDIS->PDIS = lista;
+            lista->PDIS = temp;
+        }
+    }
 }
 
 
-
-int ler_ficheiro() {
+void ler_ficheiro(lCIDADE lista) {
     FILE *teste;
-    char linha[20000];
-    char nome_cidade[50];
-    char nome_pdi[50];
-    char descricao[1000];
-    char horario[50];
+    char linha[2000];
+    char nome_cidade[100];
+    char nome_pdit[50];
+    char descricaot[2000];
+    char horariot[100];
 
-    lCIDADE l_cidades, aux;
-    l_cidades = cria_lista_cidade();
+    lCIDADE aux;
     int count = 1; //counter do numero do pdi, reseta sempre que se vai para uma cidade diferente
 
     teste = fopen("D:\\Documentos\\Uni\\1a2s\\PPP\\projeto_ppp\\cmake-build-debug\\project.txt", "r");
-    while(fgets(linha, 2000, teste)!= NULL) {
-
+    while (fgets(linha, 2000, teste) != NULL) {
+       // printf("%s", linha + 1);
 
         if (linha[0]=='*') {
             count = 1; //reseta o counter de pdi
-            strcpy(nome_cidade, linha+1);    //adicionar o nome da cidade ao struct
-            printf("%s", linha+1);
-            aux = insere_lista_CIDADES(l_cidades, linha+1);
-           /* l_pdis = cria_lista_PDIS();    //criar lista de PDIS sempre que se mudar de cidade*/
+            strcpy(nome_cidade, linha+1);
+            //printf("%s", linha+1);
+            aux = insere_lista_CIDADES(lista, nome_cidade);
         }
 
         else if (linha[0]=='&') {
-            printf("PDI nr. %d -> %s", count, linha+1); //legit esta merda nao tava a dar print de nada e taa a lixar o programa e do nada funcionou, nao sei que magia negra e mas nao mexas muito nisto.
+            //printf("PDI nr. %d -> %s", count, linha+1);
             count++; //incrementa o counter do pdi
-            strcpy(nome_pdi, linha+1);
+            strcpy(nome_pdit, linha+1);
         }
 
+//a partir daqui o imprimir cidades para de funcionar
+
         else if (linha[0]=='#') {
-            printf("Descricao:%s", linha+1);
-            strcpy(descricao, linha+1);
+            //printf("Descricao:%s", linha+1);
+            strcpy(descricaot, linha+1);
         }
 
         else if (linha[0]=='$') {
-            printf("Horario: %s", linha+1);
-            strcpy(horario, linha+1);
-            insere_lista_PDIS_horario(aux->PDIS, nome_pdi, descricao, horario);
+            //printf("Horario: %s", linha+1);
+            strcpy(horariot, linha+1);
+            insere_lista_PDIS(aux->PDIS, nome_pdit, descricaot, horariot);
         }
 
         else {
             printf("O ficheiro está corrupto");
         }
+
     }
 
-    return 0;
+    fclose(teste);
+    imprime_lista_cidades(lista);
+
 }
 
 int criar_user() {
@@ -236,27 +286,11 @@ int criar_user() {
     printf("Morada: \n");
     gets(morada);
 
-
-    /*                  ///////////TESTING PURPOSES ONLY//////////////
-    printf("\nnome: %s", nome);
-    //printf("\napelido: %s", apelido);
-    printf("\ndata de nascimento: %s", nascimento);
-    printf("\nnr. telefone: %s", telefone);
-    printf("\nmorada: %s", morada);
-
-    printf("\ntudo novamente: %s %s %s %s \n", nome, nascimento, telefone, morada); //para teste, verificar que tudo ficou dividido em diferentes variaveis
-    */
-    //atribuiçao de dados a struct do user. sera que invalida a necessidade da funcao assign?
-    //USER user_atual = {nome, nascimento, telefone, morada}; //probs vai ser usada mais para ler do ficheiro e preencher a struct do que a criar o user, mas fica aqui por motivos de testing.
     USER user_atual;
     strcpy(user_atual.nome, nome);
     strcpy(user_atual.nascimento, nascimento);
     strcpy(user_atual.nr_telefone, telefone);
     strcpy(user_atual.morada, morada);
-    //testes da struct, parece atribuir bem os elementos, mas ja falhou uma vez, necessita de testing posterior
-
-    //printf("\nnome_struct: %s\nidade_struct: %s\nnrtelefone_struct: %s\nmorada_struct: %s", user_atual.nome, user_atual.nascimento, user_atual.nr_telefone, user_atual.morada);
-
 
     //abre ficheiro
     FILE* users; //criar var do ficheiro
@@ -268,12 +302,66 @@ int criar_user() {
     return 0;
 }
 
+int procura_ficheiro(char *nomefile,char *str){
+    FILE *f;
+
+    int numero_linha = 1;
+
+    f = fopen(nomefile,"r");
+    char max[150];
+    while(fgets(max,sizeof(max),f) != NULL){
+        if((strstr(max,str) != NULL)){
+            return numero_linha;
+        }
+        numero_linha++;
+    }
+}
+
+
+
+void eliminar_utilizador(char *nomefile,int bi){
+    FILE *fptr1,*fptr2;
+    char ch;
+    char str_bi[8];
+
+    sprintf(str_bi,"%d",bi);
+
+    fptr1 = fopen(nomefile,"r");
+    ch = getc(fptr1);
+
+    int num_linha = 1;
+    int linha_apagar = procura_ficheiro(nomefile,str_bi);
+
+    fptr2 = fopen("replica.c","w");
+
+
+    for(;;){
+        if(ch == EOF){
+            break;
+        }
+        if(num_linha != linha_apagar){
+            putc(ch,fptr2);
+        }
+        if(ch == '\n'){
+            num_linha++;
+        }
+        ch = getc(fptr1);
+    }
+    fclose(fptr1);
+    fclose(fptr2);
+    remove(nomefile);
+    rename("replica.c",nomefile);
+}
+
+
+
 void placeholder() {
     //so placeholder para switch, etc.
 }
 
 
-int menu() {
+int menu(lCIDADE lista) {
+    char user[100];
     int opcao;
     printf("---------------------------------------------------------------------------------------------------------\n");
     printf("Escreva um numero de acordo com a operaçao que pretende realizar:");
@@ -283,56 +371,52 @@ int menu() {
     printf("\n4)Remover PDIS favoritos de um utilizador");
     printf("\n5)Ver os PDI's pela sua popularidade");
     printf("\n6)Construir uma viagem baseada nos gostos de um utilizador");
-    printf("\n7)Acabar a sessao");
+    printf("\n7)Eliminar um utilizador");
+    printf("\n8)Acabar a sessao");
     printf("\n---------------------------------------------------------------------------------------------------------------\n");
     scanf("%c", opcao);
 
     switch(opcao) {
         case '1':
-            ler_ficheiro();
-            menu();
+            ler_ficheiro(lista);
+            menu(lista);
         case '2':
             criar_user();
-            menu();
+            menu(lista);
         case '3':
             placeholder();
-            menu();
+            menu(lista);
         case '4':
             placeholder();
-            menu();
+            menu(lista);
         case '5':
             placeholder();
-            menu();
+            menu(lista);
         case '6':
             placeholder();
-            menu();
+            menu(lista);
         case '7':
+            gets(user);
+            eliminar_utilizador("utilizadores.txt", 50);
+        case '8':
             return 0;
         default:
             printf("Essa não é uma opcao possivel");
-            menu();
+            menu(lista);
     }
 }
 
 
 int main() {
-    //menu();           //-> devera ficar ligado no final, desligado para testes com listas ligadas e ficheiros
-    ler_ficheiro();
+    lCIDADE l_cidades;
+    l_cidades = cria_lista_cidade();
+    //menu(l_cidades);           //-> devera ficar ligado no final, desligado para testes com listas ligadas e ficheiros
+    ler_ficheiro(l_cidades);
     //criar_user();     //-> testado, funciona ao escrever o user no file
-
+    //imprime_lista_cidades(l_cidades);
 
     return 0;
 }
 
 
-//ver linha 115
-/*
-int assign(CIDADE *variable, const char *str,char *membro_struct) { //como e que raio e que torno m argumento da funçao num elemento da struct, de modo a poder escolher nos argumentos o membro da struct modificado?
-    if(variable) {
-        variable->n_cidade=(char*)calloc(strlen(str),sizeof(char));
-        strncpy(variable->n_cidade,str,strlen(str));
-    }
-    return 0;
-}
-*/
 
