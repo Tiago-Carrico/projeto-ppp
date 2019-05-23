@@ -40,7 +40,7 @@ int compilar_lista_users(lUSER lista);
 
 ///////////////////////Funçoes de users/////////////////////////
 lUSER cria_lista_USERS();
-lUSER procura_lista_USERS(lUSER lista, char chave[], lUSER *ant, lUSER *actual);
+void procura_lista_USERS(lUSER lista, char chave[], lUSER *ant, lUSER *actual);
 lUSER insere_lista_USERS(lUSER lista,char nome[100],char nascimento[30], char nr_telefone[20], char morada[50], char pdi_hot[50]);
 void troca_user(USER *a, USER *b);
 void Sort_user(USER *start);
@@ -92,28 +92,27 @@ lUSER cria_lista_USERS() {
     return aux;
 }
 
-lUSER procura_lista_USERS(lUSER lista, char chave[], lUSER *ant, lUSER *actual) {
+void procura_lista_USERS(lUSER lista, char chave[], lUSER *ant, lUSER *actual) {
     *ant = lista;
     *actual = lista->users;
-    lUSER final;
-
+    if(*actual != NULL) {
+       // printf("\nini ||%s|| ao ler %d, %d", (*actual)->nome, strlen(chave), strlen((*actual)->nome));
+    }
     while ((*actual) != NULL && strcmp((*actual)->nome, chave)<0){
         *ant = *actual;
         *actual = (*actual)->users;
+        if(*actual != NULL) {
+            //printf("\nciclo %s ao ler %d, %d", (*actual)->nome, strlen(chave), strlen((*actual)->nome));
+        }
     }
 
     if ((*actual) != NULL && strcmp((*actual)->nome, chave) != 0) {
-//TODO esta aqui a soluçao do procurar por um nome, pode ser preciso usar nas outras, e se nao encontrar da o primeiro nome da lista
-        final = *actual;
+        //printf("\nantes fim  ||%s|| ao ler %d, %d", (*actual)->nome, strlen(chave), strlen((*actual)->nome));
         *actual = NULL;     //se o elemento nao for encontrado
-        return final;
     }
-
-    else if((*actual) != NULL && strcmp((*actual)->nome, chave) == 0) {
-        final = *actual;
-        return final;
+    if(*actual != NULL) {
+        //printf("\nfim ||%s|| ao ler %d ", (*actual)->nome, strlen(chave)/*, strlen((*actual)->nome)*/);
     }
-
 }
 
 
@@ -237,27 +236,28 @@ void imprime_lista_PDIS(lPDI lista) {
 
 //TODO procura pdi hot
 lPDI procura_pdi_hot(lCIDADE procurar,char chave[],lCIDADE *ant,lCIDADE *actual) {
-    *ant=procurar;
-    *actual=procurar->cidades;
+    *ant = procurar;
+    *actual = procurar->cidades;
     lPDI l_pdi = NULL;
     while ((*actual != NULL)) {
 
-        l_pdi=(*ant)->PDIS;
+        l_pdi = (*ant)->PDIS;
 
-        while (l_pdi!=NULL && strcmp(l_pdi->n_pdi,chave)!=0){
+        while (l_pdi != NULL && strcmp(l_pdi->n_pdi, chave) != 0) {
 
-            l_pdi=l_pdi->PDIS;
+            l_pdi = l_pdi->PDIS;
         }
 
-        if (l_pdi!=NULL && strcmp(l_pdi->n_pdi,chave)==0 ) {
+        if (l_pdi != NULL && strcmp(l_pdi->n_pdi, chave) == 0) {
             l_pdi->popularidade++;
             return l_pdi;
         }
-        else if (l_pdi==NULL) {
-            *ant=*actual;
-            *actual=(*actual)->cidades;
+        else if (l_pdi == NULL) {
+            *ant = *actual;
+            *actual = (*actual)->cidades;
         }
     }
+    return l_pdi;
 }
 
 
@@ -422,6 +422,7 @@ int ler_users(lUSER lista){
     while (fgets(linha, 2000, users) != NULL) {
 
         if (linha[0]=='+') {
+            linha[strlen(linha)-1]='\0';
             strcpy(nome, linha+1);
         }
 
@@ -462,6 +463,7 @@ int procura_ficheiro(char *nomefile,char *str){
 
 
 //TODO nao me lembro de adaptar muito isto, ver dps
+/*
 void eliminar_utilizador(char *nomefile,int bi){
     FILE *fptr1,*fptr2;
     char ch;
@@ -495,23 +497,23 @@ void eliminar_utilizador(char *nomefile,int bi){
     remove(nomefile);
     rename("replica.c",nomefile);
 }
-
+*/
 
 void sel_pref_user(lUSER lista_user, lCIDADE lista_cidade){
     char nome_atual[100];
     lUSER ant, inutil;
     lUSER user_procurado;
     int i, n;
-    printf("Escreve o nome do utilizador:\n");
-    gets(nome_atual);
+    do {
+        printf("Escreve o nome do utilizador:\n");
+        gets(nome_atual);
+        printf("\n %s %d",nome_atual, strlen(nome_atual));
 //TODO se o user nao for encontrado da default para o primeiro da lista
-    user_procurado = procura_lista_USERS(lista_user, nome_atual, &ant, &inutil);
+        procura_lista_USERS(lista_user, nome_atual, &ant, &user_procurado);
+        printf("\n %s %d",user_procurado->nome, strlen(nome_atual));
 
-    if (user_procurado == NULL) {
-        printf("O utilizador nao foi encontrado\n");
-        sel_pref_user(lista_user, lista_cidade);
-    }
-    else{
+    }while (user_procurado == NULL);
+
         printf("Dados do utilizador:\nNome:%s\nData de nascimento:%s\nNr. de telefone:%s\nMorada:%s\n", user_procurado->nome,user_procurado->nascimento,user_procurado->nr_telefone,user_procurado->morada);
         printf("Indique quantos pontos de interesse quer definir:");
         scanf("%d", &n);
@@ -521,6 +523,7 @@ void sel_pref_user(lUSER lista_user, lCIDADE lista_cidade){
             gets(nome_pdi_atual);
             lCIDADE ant2;
             lCIDADE actual;
+            lPDI pref_actual;
             lPDI procura_pdi = procura_pdi_hot(lista_cidade, nome_pdi_atual, &ant2, &actual);
 
 //TODO da sempre que nao encontra
@@ -534,7 +537,7 @@ void sel_pref_user(lUSER lista_user, lCIDADE lista_cidade){
         }
 
     }
-}
+
 
 
 void placeholder() {
@@ -582,7 +585,8 @@ int menu(lCIDADE lista_cidades, lUSER lista_users) {
             menu(lista_cidades,lista_users);
         case 7:
             gets(user);
-            eliminar_utilizador("utilizadores.txt", 50);
+            //TODO reativar
+            //eliminar_utilizador("utilizadores.txt", 50);
         case 8:
             return 0;
         default:
@@ -607,18 +611,22 @@ int main() {
     lUSER l_users;
     l_users = cria_lista_USERS();
 
-
+    compilar_lista_users(l_users);
     //menu(l_cidades);           //-> devera ficar ligado no final, desligado para testes com listas ligadas e ficheiros
     //ler_ficheiro_cidades(l_cidades);
     compilar_lista_cidades(l_cidades);
     //criar_user();     //-> testado, funciona ao escrever o user no file
     //imprime_lista_cidades(l_cidades);
-    //printf("\n\n\n");
-    Sort_cidade(l_cidades);
-    imprime_lista_cidades(l_cidades);
-    compilar_lista_users(l_users);
-    imprime_lista_users(l_users);
+    //imprime_lista_cidades(l_cidades);
+
+    //imprime_lista_users(l_users);
     sel_pref_user(l_users, l_cidades);
+
+    /*
+    lUSER ant, inutil;
+    printf("\n\n\n");
+    procura_lista_USERS(l_users, "Tiago Carrico", &ant, &inutil );
+     */
     return 0;
 }
 
