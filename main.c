@@ -101,16 +101,14 @@ lUSER procura_lista_USERS(lUSER lista, char chave[], lUSER *ant, lUSER *actual) 
         *ant = *actual;
         *actual = (*actual)->users;
     }
-    if((*actual) != NULL && strcmp((*actual)->nome, chave) == 0) {
-        final = *actual;
-        return final;
-    }
+
     if ((*actual) != NULL && strcmp((*actual)->nome, chave) != 0) {
 //TODO esta aqui a soluçao do procurar por um nome, pode ser preciso usar nas outras, e se nao encontrar da o primeiro nome da lista
-
         final = *actual;
         *actual = NULL;     //se o elemento nao for encontrado
+        return final;
     }
+
     else if((*actual) != NULL && strcmp((*actual)->nome, chave) == 0) {
         final = *actual;
         return final;
