@@ -48,7 +48,7 @@ void imprime_lista_users(lUSER lista);
 void sel_pref_user(lUSER lista_user, lCIDADE lista_cidade);
 int criar_user();
 int ler_users(lUSER lista);
-void eliminar_utilizador(char *nomefile,int bi);
+void eliminar_utilizador(char *nome_fich);
 
 
 //////////////////////Funçoes de cidades///////////////////////
@@ -75,6 +75,7 @@ lPDI procura_pdi_hot(lCIDADE procurar,char chave[],lCIDADE *ant,lCIDADE *actual)
 ////////////////////Funçoes gerais/multiusos/////////////////
 int procura_ficheiro(char *nomefile,char *str);
 int menu(lCIDADE lista_cidades, lUSER lista_users);
+void placeholder();
 int main();
 
 
@@ -216,6 +217,7 @@ void insere_lista_PDIS(lPDI lista,char nome_pdi[100],char descricao[2000], char 
         strcpy(no->n_pdi, nome_pdi);
         strcpy(no->descricao, descricao);
         strcpy(no->horario, horario);
+        no->popularidade = 0;
         procura_lista_PDIS(lista, nome_pdi, &ant, &inutil);
         no->PDIS = ant->PDIS;
         ant->PDIS = no;
@@ -361,12 +363,11 @@ void ler_ficheiro_cidades(lCIDADE lista) {
     char horariot[100];
     lCIDADE aux;
 
-    teste = fopen("D:\\Documentos\\Uni\\1a2s\\PPP\\projeto_ppp\\cmake-build-debug\\project.txt", "r");
+    teste = fopen("project.txt", "r");
     while (fgets(linha, 2000, teste) != NULL) {
 
         if (linha[0]=='*') {
             strcpy(nome_cidade, linha+1);
-
             aux = insere_lista_CIDADES(lista, nome_cidade);
         }
 
@@ -433,7 +434,7 @@ int ler_users(lUSER lista){
     char morada[50];
     lUSER aux;
 
-    users = fopen("D:\\Documentos\\Uni\\1a2s\\PPP\\projeto_ppp\\cmake-build-debug\\utilizadores.txt", "r");
+    users = fopen("utilizadores.txt", "r");
     while (fgets(linha, 2000, users) != NULL) {
 
         if (linha[0]=='+') {
@@ -461,58 +462,77 @@ int ler_users(lUSER lista){
     fclose(users);
 }
 
-int procura_ficheiro(char *nomefile,char *str){
-    FILE *f;
+int procura_ficheiro(char* nome_fich, char procurar[2000]) {
+    FILE *file_procura;
+    char linha[2000];
+    int nr_linha = 0;
 
-    int numero_linha = 1;
-
-    f = fopen(nomefile,"r");
-    char max[150];
-    while(fgets(max,sizeof(max),f) != NULL){
-        if((strstr(max,str) != NULL)){
-            return numero_linha;
+    file_procura = fopen(nome_fich, "r");
+    while(fgets(linha, 2000, file_procura) != NULL) {
+        strcpy(linha, linha+1);
+        linha[strlen(linha)-1]='\0';
+        if(strcmp(linha, procurar) == 0) {
+            return nr_linha;
         }
-        numero_linha++;
+        else {
+            nr_linha++;
+        }
     }
+    fclose(file_procura);
 }
-
 
 //TODO nao me lembro de adaptar muito isto, ver dps
-/*
-void eliminar_utilizador(char *nomefile,int bi){
-    FILE *fptr1,*fptr2;
-    char ch;
-    char str_bi[8];
 
-    sprintf(str_bi,"%d",bi);
+void eliminar_utilizador(char *nome_fich){
+    FILE *file_names,*file_copia;
+    char ch[1000];
+    char str[8];
+    char nome[1000];
+    char linha[1000];
+    gets(linha);
 
-    fptr1 = fopen(nomefile,"r");
-    ch = getc(fptr1);
-
+    file_names = fopen(nome_fich,"r");
+    file_copia = fopen("copia.txt","w");
     int num_linha = 1;
-    int linha_apagar = procura_ficheiro(nomefile,str_bi);
+    int linha_apagar = procura_ficheiro(nome_fich,linha) +1;
 
-    fptr2 = fopen("replica.c","w");
+            char teste[] = "fucking hell save me";
+            char buffer[100];
 
-
-    for(;;){
-        if(ch == EOF){
-            break;
-        }
-        if(num_linha != linha_apagar){
-            putc(ch,fptr2);
-        }
-        if(ch == '\n'){
+    while (fgets(ch, 1000, file_names) != NULL){
+        if((num_linha != linha_apagar) && (num_linha != linha_apagar + 1) && (num_linha != linha_apagar + 2) && (num_linha != linha_apagar + 3)){
+            fprintf(file_copia, "%s", ch);
             num_linha++;
         }
-        ch = getc(fptr1);
+        else {
+            fputs("", file_copia);
+            num_linha++;
+        }
     }
-    fclose(fptr1);
-    fclose(fptr2);
-    remove(nomefile);
-    rename("replica.c",nomefile);
+
+    //TODO os fclose nao fecham os ficheiros/falham
+    fclose( file_names );
+    fclose( file_copia );
+
+    if(fclose(file_names) == 0)
+        printf("ok");
+    else
+        printf("1 fclose falhou");
+
+    if(fclose(file_copia) == 0)
+        printf("ok2");
+    else
+        printf("2 fclose falhou");
+
+    int ret = remove(nome_fich);
+    remove(nome_fich);
+    printf("remove %d",ret);
+    int rev = rename("copia.txt",nome_fich);
+    rename("copia.txt",nome_fich);
+    printf("rename: %d", rev);
 }
-*/
+
+
 
 void sel_pref_user(lUSER lista_user, lCIDADE lista_cidade){
     char nome_atual[100];
@@ -532,33 +552,30 @@ void sel_pref_user(lUSER lista_user, lCIDADE lista_cidade){
         printf("Dados do utilizador:\nNome:%s\nData de nascimento:%s\nNr. de telefone:%s\nMorada:%s\n", user_procurado->nome,user_procurado->nascimento,user_procurado->nr_telefone,user_procurado->morada);
         printf("Indique quantos pontos de interesse quer definir:");
         scanf("%d", &n);
-        for(i = 0; i <= n; i++){
-            printf("Indique o nome do ponto de interesse preferido:\n");
+        printf("Indique o nome do ponto de interesse preferido:\n");
+        for(i = 0; i <= n ; i++){
             char nome_pdi_atual[50];
-
             gets(nome_pdi_atual);
             lCIDADE ant2;
             lCIDADE actual;
             lPDI procura_pdi = procura_pdi_hot(lista_cidade, nome_pdi_atual, &ant2, &actual);
 
-//TODO da sempre que nao encontra
-            if (procura_pdi == NULL ){
+//TODO isto faz um inicial nulo mas de printf ta resolvido
+            if (procura_pdi == NULL && i != 0){
                 printf("O ponto de interesse que selecionou nao existe.\n");
                 sel_pref_user(lista_user, lista_cidade);
-                printf("teste if");
             }
 
-            else {
+            else if(procura_pdi != NULL && i != 0) {
                 user_procurado->lista_pdis_pref[i] = procura_pdi;
-                printf("teste else");
+                printf("Indique o nome do ponto de interesse preferido:\n");
             }
         }
 
 //para testar se os pdis entraram, e funciona por agora
-        for(int j = 0; j < n; j++) {
+        for(int j = 0; j <= n; j++) {
             printf("pdi pref:  %s\n", user_procurado->lista_pdis_pref[j]->n_pdi);
         }
-
 }
 
 
@@ -635,21 +652,18 @@ int main() {
     l_users = cria_lista_USERS();
 
     compilar_lista_users(l_users);
+    compilar_lista_cidades(l_cidades);
     //menu(l_cidades);           //-> devera ficar ligado no final, desligado para testes com listas ligadas e ficheiros
     //ler_ficheiro_cidades(l_cidades);
-    compilar_lista_cidades(l_cidades);
     //criar_user();     //-> testado, funciona ao escrever o user no file
     //imprime_lista_cidades(l_cidades);
 
 
-    sel_pref_user(l_users, l_cidades);
+    //sel_pref_user(l_users, l_cidades);
     //imprime_lista_users(l_users);
+    eliminar_utilizador("utilizadores.txt");
 
-    /*
-    lUSER ant, inutil;
-    printf("\n\n\n");
-    procura_lista_USERS(l_users, "Tiago Carrico", &ant, &inutil );
-     */
+
     return 0;
 }
 
