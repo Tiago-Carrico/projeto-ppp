@@ -462,27 +462,6 @@ int ler_users(lUSER lista){
     fclose(users);
 }
 
-int procura_ficheiro(char* nome_fich, char procurar[2000]) {
-    FILE *file_procura;
-    char linha[2000];
-    int nr_linha = 0;
-
-    file_procura = fopen(nome_fich, "r");
-    while(fgets(linha, 2000, file_procura) != NULL) {
-        strcpy(linha, linha+1);
-        linha[strlen(linha)-1]='\0';
-        if(strcmp(linha, procurar) == 0) {
-            return nr_linha;
-        }
-        else {
-            nr_linha++;
-        }
-    }
-    fclose(file_procura);
-}
-
-//TODO nao me lembro de adaptar muito isto, ver dps
-
 void eliminar_utilizador(char *nome_fich){
     FILE *file_names,*file_copia;
     char ch[1000];
@@ -496,8 +475,8 @@ void eliminar_utilizador(char *nome_fich){
     int num_linha = 1;
     int linha_apagar = procura_ficheiro(nome_fich,linha) +1;
 
-            char teste[] = "fucking hell save me";
-            char buffer[100];
+    char teste[] = "fucking hell save me";
+    char buffer[100];
 
     while (fgets(ch, 1000, file_names) != NULL){
         if((num_linha != linha_apagar) && (num_linha != linha_apagar + 1) && (num_linha != linha_apagar + 2) && (num_linha != linha_apagar + 3)){
@@ -532,24 +511,57 @@ void eliminar_utilizador(char *nome_fich){
     printf("rename: %d", rev);
 }
 
+int procura_ficheiro(char* nome_fich, char procurar[2000]) {
+    FILE *file_procura;
+    char linha[2000];
+    int nr_linha = 0;
 
+    file_procura = fopen(nome_fich, "r");
+    while(fgets(linha, 2000, file_procura) != NULL) {
+        strcpy(linha, linha+1);
+        linha[strlen(linha)-1]='\0';
+        if(strcmp(linha, procurar) == 0) {
+            return nr_linha;
+        }
+        else {
+            nr_linha++;
+        }
+    }
+    fclose(file_procura);
+}
 
 void sel_pref_user(lUSER lista_user, lCIDADE lista_cidade){
     char nome_atual[100];
+    char pdi_hot[100];
     lUSER ant, inutil;
     lUSER user_procurado;
+    lCIDADE ant_hot;
+    lCIDADE actual_hot;
+
     int i, n;
     do {
         printf("Escreve o nome do utilizador:\n");
         gets(nome_atual);
-        printf("\n %s %d",nome_atual, strlen(nome_atual));
-//TODO se o user nao for encontrado da default para o primeiro da lista
+                //printf("\n %s %d",nome_atual, strlen(nome_atual));
         procura_lista_USERS(lista_user, nome_atual, &ant, &user_procurado);
-        printf("\n %s %d",user_procurado->nome, strlen(nome_atual));
+                //printf("\n %s %d",user_procurado->nome, strlen(nome_atual));
 
     }while (user_procurado == NULL);
 
         printf("Dados do utilizador:\nNome:%s\nData de nascimento:%s\nNr. de telefone:%s\nMorada:%s\n", user_procurado->nome,user_procurado->nascimento,user_procurado->nr_telefone,user_procurado->morada);
+
+        printf("Indique o ponto de interesse ""hot");
+        gets(pdi_hot);
+        lPDI procurado_hot = procura_pdi_hot(lista_cidade, pdi_hot, &ant_hot, &actual_hot);
+        if(procurado_hot == NULL){
+            printf("O ponto de interesse não foi encontrado");
+            sel_pref_user(lista_user, lista_cidade);
+        }
+        else{
+            user_procurado->pdi_hot = procurado_hot;
+        }
+
+
         printf("Indique quantos pontos de interesse quer definir:");
         scanf("%d", &n);
         printf("Indique o nome do ponto de interesse preferido:\n");
@@ -573,6 +585,7 @@ void sel_pref_user(lUSER lista_user, lCIDADE lista_cidade){
         }
 
 //para testar se os pdis entraram, e funciona por agora
+        printf("pdi hot: %s", user_procurado->pdi_hot->n_pdi);
         for(int j = 0; j <= n; j++) {
             printf("pdi pref:  %s\n", user_procurado->lista_pdis_pref[j]->n_pdi);
         }
@@ -626,7 +639,7 @@ int menu(lCIDADE lista_cidades, lUSER lista_users) {
         case 7:
             gets(user);
             //TODO reativar
-            //eliminar_utilizador("utilizadores.txt", 50);
+            eliminar_utilizador("utilizadores.txt");
         case 8:
             return 0;
         default:
@@ -661,7 +674,7 @@ int main() {
 
     //sel_pref_user(l_users, l_cidades);
     //imprime_lista_users(l_users);
-    eliminar_utilizador("utilizadores.txt");
+    //eliminar_utilizador("utilizadores.txt");
 
 
     return 0;
