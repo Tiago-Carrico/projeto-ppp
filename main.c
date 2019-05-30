@@ -27,7 +27,6 @@ typedef struct USER {
     char nr_telefone[20];
     char morada[50];
     lPDI pdi_hot;
-    //TODO usar como pdis fav e preferencia
     lPDI lista_pdis_pref[25];
     lCIDADE cidades_fav[3];
     lUSER users;
@@ -53,33 +52,36 @@ void eliminar_utilizador(char *nome_fich);
 
 //////////////////////Funçoes de cidades///////////////////////
 lCIDADE cria_lista_cidade();
-void procura_lista_CIDADES(lCIDADE lista, char chave[], lCIDADE *ant, lCIDADE *actual);
+lCIDADE procura_lista_CIDADES(lCIDADE lista, char chave[], lCIDADE *ant, lCIDADE *actual);
 lCIDADE insere_lista_CIDADES(lCIDADE lista, char it[]);
 void troca_cidade(CIDADE *a, CIDADE *b);
 void ler_ficheiro_cidades(lCIDADE lista);
 void Sort_cidade(CIDADE *start);
 void imprime_lista_cidades(lCIDADE lista);
 int lista_vazia_CIDADES(lCIDADE lista);
+void imprime_lcidades_popularidade (lCIDADE lista);
+void imprime_lcidades_por_popularidade (lCIDADE lista);
 
 
 /////////////////////Funçoes de PDI's/////////////////////////
 lPDI cria_lista_PDIS();
 lPDI procura_lista_PDIS(lPDI lista, char chave[], lPDI *ant, lPDI *actual);
 void insere_lista_PDIS(lPDI lista,char nome_pdi[100],char descricao[2000], char horario[100]);
-
-
 void imprime_lista_PDIS(lPDI lista);
 lPDI procura_pdi_hot(lCIDADE procurar,char chave[],lCIDADE *ant,lCIDADE *actual);
-
+void imprime_lpdi_popularidade (lPDI lista);
+void imprime_lpdi_por_popularidade (lPDI lista);
 
 ////////////////////Funçoes gerais/multiusos/////////////////
-int procura_ficheiro(char *nomefile,char *str);
+int procura_ficheiro(char *nome_fich,char procurar[2000]);
 int menu(lCIDADE lista_cidades, lUSER lista_users);
 void placeholder();
 int main();
 
 
-//void imprime_lista_PDIS_indiv(lPDI lista[25], lUSER user, char chave);
+
+
+
 
 
 
@@ -109,7 +111,7 @@ void procura_lista_USERS(lUSER lista, char chave[], lUSER *ant, lUSER *actual) {
     }
 
     if ((*actual) != NULL && strcmp((*actual)->nome, chave) != 0) {
-        *actual = NULL;     //se o elemento nao for encontrado
+        *actual = NULL;
     }
     if(*actual != NULL) {
     }
@@ -119,7 +121,7 @@ void procura_lista_USERS(lUSER lista, char chave[], lUSER *ant, lUSER *actual) {
 lUSER insere_lista_USERS(lUSER lista,char nome[100],char nascimento[30], char nr_telefone[20], char morada[50], char pdi_hot[50]) {
     lUSER no;
     lUSER ant, inutil;
-    no = (lUSER) malloc (sizeof(USER));    //reserva espaço para o nó
+    no = (lUSER) malloc (sizeof(USER));
 
     if (no != NULL) {
         strcpy(no->nome, nome);
@@ -168,21 +170,27 @@ int lista_vazia_CIDADES(lCIDADE lista) {
     return(lista->cidades == NULL ? 2 : 0);
 }
 
-void procura_lista_CIDADES(lCIDADE lista, char chave[], lCIDADE *ant, lCIDADE *actual) {
+lCIDADE procura_lista_CIDADES(lCIDADE lista, char chave[], lCIDADE *ant, lCIDADE *actual) {
     *ant = lista;
     *actual = lista->cidades;
     while ((*actual) != NULL && strcmp((*actual)->n_cidade,  chave)<0){
         *ant = *actual;
         *actual = (*actual)->cidades;
+                printf("nope, ainda nao encontrou\n");
     }
-    if ((*actual) != NULL && strcmp((*actual)->n_cidade, chave)!=0)
+    if ((*actual) != NULL && strcmp((*actual)->n_cidade, chave)!=0) {
         *actual = NULL;
+    }
+
+                printf("encontrou a cidade\n");
+        return *actual;
+
 }
 
 lCIDADE insere_lista_CIDADES(lCIDADE lista, char it[]) {
     lCIDADE no;
     lCIDADE ant, inutil;
-    no = (lCIDADE) malloc (sizeof(CIDADE));    //reserva espaço para o nó
+    no = (lCIDADE) malloc (sizeof(CIDADE));
 
     if (no != NULL) {
         strcpy(no->n_cidade, it);
@@ -202,15 +210,15 @@ lPDI procura_lista_PDIS(lPDI lista, char chave[], lPDI *ant, lPDI *actual) {
         *actual = (*actual)->PDIS;
     }
     if ((*actual) != NULL && strcmp((*actual)->n_pdi, chave)!=0)
-        *actual = NULL;     //se o elemento nao for encontrado
-    //TODO o return pode ter quebrado isto, nao quebrou no user mas verificar dps
+        *actual = NULL;
+
     return *actual;
 }
 
 void insere_lista_PDIS(lPDI lista,char nome_pdi[100],char descricao[2000], char horario[100]) {
     lPDI no;
     lPDI ant, inutil;
-    no = (lPDI) malloc (sizeof(PDI));    //reserva espaço para o nó
+    no = (lPDI) malloc (sizeof(PDI));
 
     if (no != NULL) {
 
@@ -236,19 +244,44 @@ void imprime_lista_PDIS(lPDI lista) {
     }
 }
 
-/*
-void imprime_lista_PDIS_indiv(lPDI lista[25], lUSER user, char chave) {
-    lUSER *ant, *inutil;
-    procura_lista_USERS(user, chave, *ant, *inutil);
-    lPDI l = lista; //salta o header
-    while (l) {
-        printf("%s", l->n_pdi);
-        l = l->PDIS;
+lCIDADE procura_lcidades_best (lCIDADE lista,char chave[],lCIDADE *ant,lCIDADE *actual)
+{
+    *ant=lista;
+    *actual=lista->cidades;
+    while ((*actual)!=NULL && strcmp((*actual)->n_cidade,chave) < 0) {
+        *ant = *actual;
+        *actual = (*actual)->cidades;
     }
-}
-*/
+        if ((*actual) != NULL && strcmp((*actual)->n_cidade, chave) != 0)
+            *actual = NULL;
 
-//TODO procura pdi hot
+    return *actual;
+}
+
+
+lCIDADE procura_cidades_best(lCIDADE procurar,char chave[],lCIDADE *ant,lCIDADE *actual) {
+    *ant = procurar;
+    *actual = procurar->cidades;
+    lCIDADE l_cidade = NULL;
+    while ((*actual != NULL)) {
+        l_cidade = (*ant)->cidades;
+        while (l_cidade != NULL && strcmp(l_cidade->n_cidade, chave) != 0) {
+            l_cidade = l_cidade->cidades;
+        }
+
+        if (l_cidade != NULL && strcmp(l_cidade->n_cidade, chave) == 0) {
+            l_cidade->popularidade++;
+            return l_cidade;
+
+        }
+        else if (l_cidade == NULL) {
+            *ant = *actual;
+            *actual = (*actual)->cidades;
+        }
+    }
+    return NULL;
+}
+
 lPDI procura_pdi_hot(lCIDADE procurar,char chave[],lCIDADE *ant,lCIDADE *actual) {
     *ant = procurar;
     *actual = procurar->cidades;
@@ -256,15 +289,11 @@ lPDI procura_pdi_hot(lCIDADE procurar,char chave[],lCIDADE *ant,lCIDADE *actual)
     while ((*actual != NULL)) {
         l_pdi = (*ant)->PDIS;
         while (l_pdi != NULL && strcmp(l_pdi->n_pdi, chave) != 0) {
-
-                    //printf("2while %d %d chave: %s pdi: %s\n", strlen(chave), strlen(l_pdi->n_pdi),chave, l_pdi->n_pdi);
             l_pdi = l_pdi->PDIS;
         }
 
         if (l_pdi != NULL && strcmp(l_pdi->n_pdi, chave) == 0) {
-                    //printf("teste b4 if inicial ||%s|| %d %d\n", l_pdi->n_pdi,strlen(chave), strlen(l_pdi->n_pdi));
             l_pdi->popularidade++;
-                    //printf("teste b4 if final ||%s|| ||%d|| %d %d\n", l_pdi->n_pdi, l_pdi->popularidade,strlen(chave), strlen(l_pdi->n_pdi));
             return l_pdi;
 
         }
@@ -277,7 +306,7 @@ lPDI procura_pdi_hot(lCIDADE procurar,char chave[],lCIDADE *ant,lCIDADE *actual)
 
 
 void imprime_lista_cidades(lCIDADE lista) {
-    lCIDADE l = lista->cidades; //salta o header
+    lCIDADE l = lista->cidades;
     while (l) {
         printf("\n\n%s\n ", l->n_cidade);
         imprime_lista_PDIS(l->PDIS);
@@ -285,7 +314,6 @@ void imprime_lista_cidades(lCIDADE lista) {
     }
 }
 
-//https://www.geeksforgeeks.org/c-program-bubble-sort-linked-list/
 
 void troca_cidade(CIDADE *a, CIDADE *b){
     char *temp = a->n_cidade;
@@ -294,17 +322,17 @@ void troca_cidade(CIDADE *a, CIDADE *b){
 }
 
 void Sort_cidade(CIDADE *start){
-    int swapped, i;
+    int trocado, i;
     CIDADE *ptr1;
     CIDADE *lptr = NULL;
 
-    /* Checking for empty list */
+
     if (start == NULL)
         return;
 
     do
     {
-        swapped = 0;
+        trocado = 0;
         ptr1 = start;
 
         while (ptr1->cidades != lptr)
@@ -312,13 +340,13 @@ void Sort_cidade(CIDADE *start){
             if (strcmp(ptr1->n_cidade, ptr1->cidades->n_cidade) > 0)
             {
                 troca_cidade(ptr1, ptr1->cidades);
-                swapped = 1;
+                trocado = 1;
             }
             ptr1 = ptr1->cidades;
         }
         lptr = ptr1;
     }
-    while (swapped);
+    while (trocado);
 }
 
 void troca_user(USER *a, USER *b){
@@ -328,16 +356,16 @@ void troca_user(USER *a, USER *b){
 }
 
 void Sort_user(USER *start){
-    int swapped, i;
+    int trocado, i;
     USER *ptr1;
     USER *lptr = NULL;
 
-    if (start == NULL)  //verificar se a lista esta vazia
+    if (start == NULL)
         return;
 
     do
     {
-        swapped = 0;
+        trocado = 0;
         ptr1 = start;
 
         while (ptr1->users != lptr)
@@ -345,13 +373,13 @@ void Sort_user(USER *start){
             if (strcmp(ptr1->nome, ptr1->users->nome) > 0)
             {
                 troca_user(ptr1, ptr1->users);
-                swapped = 1;
+                trocado = 1;
             }
             ptr1 = ptr1->users;
         }
         lptr = ptr1;
     }
-    while (swapped);
+    while (trocado);
 }
 
 void ler_ficheiro_cidades(lCIDADE lista) {
@@ -385,17 +413,11 @@ void ler_ficheiro_cidades(lCIDADE lista) {
             insere_lista_PDIS(aux->PDIS, nome_pdit, descricaot, horariot);
             aux->popularidade = 0;
         }
-        /*
-        else {
-            printf("O ficheiro está corrupto");
-        }
-         */
     }
     fclose(teste);
 }
 
 int criar_user() {
-    //iniciar variaveis para todos os dados necessarios
     char nome[100];
     char nascimento[30];
     char telefone[20];
@@ -416,10 +438,9 @@ int criar_user() {
     strcpy(user_atual.nr_telefone, telefone);
     strcpy(user_atual.morada, morada);
 
-    //abre ficheiro
-    FILE* users; //criar var do ficheiro
-    users = fopen("utilizadores.txt", "a"); //abrir documento texto
-    fprintf(users, "+%s\n?%s\n@%s\n!%s\n", nome, nascimento, telefone, morada); //escrever os dados do user, + para o nome, ? para a data de nascimento, @ para o telefone, ! para a morada
+    FILE* users;
+    users = fopen("utilizadores.txt", "a");
+    fprintf(users, "+%s\n?%s\n@%s\n!%s\n", nome, nascimento, telefone, morada);
     fclose(users); //fechar ficheiro
 
     return 0;
@@ -489,7 +510,7 @@ void eliminar_utilizador(char *nome_fich){
         }
     }
 
-    //TODO os fclose nao fecham os ficheiros/falham
+
     fclose( file_names );
     fclose( file_copia );
 
@@ -530,21 +551,58 @@ int procura_ficheiro(char* nome_fich, char procurar[2000]) {
     fclose(file_procura);
 }
 
+void def_locs_pref(lCIDADE lista_cidade, lUSER lista_user) {
+    char nome_atual[100];
+    int j;
+    lUSER ant, user_procurado;
+    //TODO fuck shit fuck shit fuck why dont you fucking work
+
+    do {
+        printf("Escreve o nome do utilizador:\n");
+        gets(nome_atual);
+        procura_lista_USERS(lista_user, nome_atual, &ant, &user_procurado);
+
+    }while (user_procurado == NULL);
+
+    printf("Indique as suas tres cidades preferidas:\n");
+    printf("Indique o nome da cidade:\n");
+    for(j = 0; j < 3 ; j++){
+        char nome_cidade_atual[50];
+        lCIDADE ant_cidade,actual_cidade;
+        printf("Indique o nome da cidade:\n");
+        gets(nome_cidade_atual);
+        lCIDADE procura_cidade = procura_cidades_best(lista_cidade, nome_cidade_atual, &ant_cidade, &actual_cidade);
+
+                printf("cidade_actual: %s", procura_cidade->n_cidade);
+                printf("cidade: %s\n", procura_cidade->n_cidade);
+
+        if (procura_cidade == NULL && j != 0){
+            printf("A cidade que selecionou nao existe.\n");
+            sel_pref_user(lista_user, lista_cidade);
+        }
+
+        else {
+                    printf("encontrei a cidade");
+            user_procurado->cidades_fav[j] = procura_cidade;
+        }
+    }
+
+}
+
+
 void sel_pref_user(lUSER lista_user, lCIDADE lista_cidade){
     char nome_atual[100];
     char pdi_hot[100];
-    lUSER ant, inutil;
+    lUSER ant;
     lUSER user_procurado;
     lCIDADE ant_hot;
     lCIDADE actual_hot;
 
-    int i, n;
+    int i, n, j;
     do {
         printf("Escreve o nome do utilizador:\n");
         gets(nome_atual);
-                //printf("\n %s %d",nome_atual, strlen(nome_atual));
         procura_lista_USERS(lista_user, nome_atual, &ant, &user_procurado);
-                //printf("\n %s %d",user_procurado->nome, strlen(nome_atual));
 
     }while (user_procurado == NULL);
 
@@ -572,7 +630,6 @@ void sel_pref_user(lUSER lista_user, lCIDADE lista_cidade){
             lCIDADE actual;
             lPDI procura_pdi = procura_pdi_hot(lista_cidade, nome_pdi_atual, &ant2, &actual);
 
-//TODO isto faz um inicial nulo mas de printf ta resolvido
             if (procura_pdi == NULL && i != 0){
                 printf("O ponto de interesse que selecionou nao existe.\n");
                 sel_pref_user(lista_user, lista_cidade);
@@ -584,14 +641,24 @@ void sel_pref_user(lUSER lista_user, lCIDADE lista_cidade){
             }
         }
 
-//para testar se os pdis entraram, e funciona por agora
-        printf("pdi hot: %s", user_procurado->pdi_hot->n_pdi);
-        for(int j = 0; j <= n; j++) {
-            printf("pdi pref:  %s\n", user_procurado->lista_pdis_pref[j]->n_pdi);
-        }
 }
 
+void imprime_lcidades_popularidade (lCIDADE lista) {
+    lCIDADE l=lista->cidades;
+    while(l){
+        printf("%s Popularidade: %d\n",l->n_cidade,l->popularidade);
+        imprime_lpdi_popularidade(l->PDIS);
+        l=l->cidades;
+    }
+}
 
+void imprime_lpdi_popularidade (lPDI lista) {
+    lPDI l=lista->PDIS;
+    while(l){
+        printf("\t%s Popularidade: %d\n",l->n_pdi,l->popularidade);
+        l=l->PDIS;
+    }
+}
 
 void placeholder() {
     //so placeholder para switch, etc.
@@ -605,9 +672,9 @@ int menu(lCIDADE lista_cidades, lUSER lista_users) {
     printf("Escreva um numero de acordo com a operaçao que pretende realizar:");
     printf("\n1)Ver todos os destinos possiveis");
     printf("\n2)Criar um novo utilizador");
-    printf("\n3)Selecionar preferencias para um utilizador existente");
-    printf("\n4)Remover PDIS favoritos de um utilizador");
-    printf("\n5)Ver os PDI's pela sua popularidade");
+    printf("\n3)Ver todos os utilizadores registados");
+    printf("\n4)Selecionar preferencias para um utilizador existente");
+    printf("\n5)Ver os destinos pela sua popularidade");
     printf("\n6)Construir uma viagem baseada nos gostos de um utilizador");
     printf("\n7)Eliminar um utilizador");
     printf("\n8)Acabar a sessao");
@@ -616,30 +683,26 @@ int menu(lCIDADE lista_cidades, lUSER lista_users) {
 
     switch(opcao) {
         case 1:
-            printf("");
-            compilar_lista_cidades(lista_cidades);
             imprime_lista_cidades(lista_cidades);
             menu(lista_cidades,lista_users);
         case 2:
-            printf("");
             criar_user();
             menu(lista_cidades,lista_users);
         case 3:
+            imprime_lista_users(lista_users);
+        case 4:
             sel_pref_user(lista_users, lista_cidades);
             menu(lista_cidades,lista_users);
-        case 4:
-            placeholder();
-            menu(lista_cidades,lista_users);
         case 5:
-            placeholder();
+            imprime_lcidades_por_popularidade(lista_cidades);
             menu(lista_cidades,lista_users);
         case 6:
-            placeholder();
+            printf("Ainda nao foi implementado");
             menu(lista_cidades,lista_users);
         case 7:
             gets(user);
-            //TODO reativar
             eliminar_utilizador("utilizadores.txt");
+            menu(lista_cidades,lista_users);
         case 8:
             return 0;
         default:
@@ -666,117 +729,38 @@ int main() {
 
     compilar_lista_users(l_users);
     compilar_lista_cidades(l_cidades);
-    //menu(l_cidades);           //-> devera ficar ligado no final, desligado para testes com listas ligadas e ficheiros
-    //ler_ficheiro_cidades(l_cidades);
-    //criar_user();     //-> testado, funciona ao escrever o user no file
-    //imprime_lista_cidades(l_cidades);
 
-
-    //sel_pref_user(l_users, l_cidades);
-    //imprime_lista_users(l_users);
-    //eliminar_utilizador("utilizadores.txt");
-
+    menu(l_cidades,l_users);
 
     return 0;
 }
 
-//TODO imprimir pdis por popularidade, adpatar ao codigo depois de implementar a popularidade
-/*
-void imprime_lcidades_popularidade (Lcidade lista) {
-    Lcidade l=lista->prox;
-    while(l){
-        printf("%s [POPULARIDADE : %d]\n",l->nome,l->popularidade);
 
-    imprime_lpdi_popularidade(l->lista_pdi);
-
-    l=l->prox;
-    }
-}
-
-void imprime_lpdi_popularidade (Lpdi lista) {
-    Lpdi l=lista->prox;
-    while(l){
-        printf("    --> %s [POPULARIDADE : %d]\n",l->nome,l->popularidade);
-        l=l->prox;
-    }
-}
-
- void imprime_lcidades_mais_populares (Lcidade lista) {
-    Lcidade l=lista->prox;
+void imprime_lcidades_por_popularidade (lCIDADE lista) {
+    lCIDADE l=lista->cidades;
     while (l) {
-        if (l->popularidade >= 2) {
-            printf("%s [POPULARIDADE : %d]\n",l->nome,l->popularidade);
-            imprime_lpdi_mais_populares(l->lista_pdi);
+        if (l->popularidade >= 1) {
+            printf("%s Popularidade: %d\n",l->n_cidade,l->popularidade);
+            imprime_lpdi_por_popularidade(l->PDIS);
             printf("\n");
-            l=l->prox;
+            l=l->cidades;
         } else {
-            imprime_lpdi_mais_populares(l->lista_pdi);
-            l=l->prox;
+            imprime_lpdi_por_popularidade(l->PDIS);
+            l=l->cidades;
         }
 
     }
 }
 
-void imprime_lpdi_mais_populares (Lpdi lista) {
-    Lpdi l=lista->prox;
+void imprime_lpdi_por_popularidade (lPDI lista) {
+    lPDI l=lista->PDIS;
     while (l) {
-        if (l->popularidade>=2) {
-            printf("    --> %s [POPULARIDADE : %d]\n",l->nome,l->popularidade);
-            l=l->prox;
+        if (l->popularidade>=1) {
+            printf("%s Popularidade: %d\n",l->n_pdi,l->popularidade);
+            l=l->PDIS;
         } else {
-            l=l->prox;
+            l=l->PDIS;
         }
     }
 }
-*/
-
-//TODO imprimir a viagem depois de feita, preciso do algoritmo pra decidir a viagem
-/*
- void imprime_viagem (Lcidade *lista) {
-    printf("\nENTROU1\n");
-    Lcidade l=(*lista)->prox;
-    int sum=1;
-    while (&l != NULL) {
-        printf("\nENTROU2\n");
-        printf("%d local a visitar : %s\n",sum,l->nome);
-        printf("\nENTROU3\n");
-        printf("    Pontos de interesse a visitar neste local: \n");
-        printf("\nENTROU4\n");
-        imprime_lpdi(l->lista_pdi);
-        printf("\nENTROU5\n");
-        printf("\n");
-        printf("\nENTROU6\n");
-        l=l->prox;
-    }
-}
- */
-
-
-
-//TODO compara locais, talvez util para fazer a viagem
-/*
-double compara_locs (Luser lu,Luser utilizador) {
-    Luser l = lu->prox;
-    double sum=0;
-
-    while (l) {
-
-        if (l->best_local[0]==NULL) {
-            l=l->prox;
-            continue;
-        } else if ((utilizador->best_local[0] == l->best_local[0] ) || (utilizador->best_local[0] == l->best_local[1] ) || (utilizador->best_local[0] == l->best_local[2] )) {
-            sum++;
-            l=l->prox;
-        } else if ((utilizador->best_local[1] == l->best_local[0] ) || (utilizador->best_local[1] == l->best_local[1] ) || (utilizador->best_local[1] == l->best_local[2] )) {
-            sum++;
-            l=l->prox;
-        } else if ((utilizador->best_local[2] == l->best_local[0] ) || (utilizador->best_local[2] == l->best_local[1] ) || (utilizador->best_local[2] == l->best_local[2] )) {
-            sum++;
-            l=l->prox;
-        }
-    }
-    return sum;
-}
- */
-
 
